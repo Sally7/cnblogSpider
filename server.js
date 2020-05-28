@@ -4,6 +4,14 @@ var http = require("http"),
 	cheerio = require("cheerio"),
 	async = require("async"),
 	eventproxy = require('eventproxy');
+var mysql = require('mysql');
+var db = mysql.createConnection({
+	host:     '127.0.0.1',
+	user:     'root',
+	password: '1qaz2wsx',
+	database: 'test'
+});
+db.connect();
 
 var ep = new eventproxy();
 
@@ -15,7 +23,7 @@ var catchFirstUrl = 'http://www.cnblogs.com/',	//入口页面
 	pageNum = 2,	//要爬取文章的页数
 	startDate = new Date(),	//开始时间
 	endDate = false;	//结束时间
-for(var i=1 ; i<= pageNum ; i++){
+for(var i=2 ; i<= pageNum ; i++){
 	pageUrls.push('https://www.cnblogs.com/?CategoryId=808&CategoryType=%22SiteHome%22&ItemListActionName=%22AggSitePostList%22&PageIndex='+ i +'&ParentCategoryId=0&TotalPostCount=4000');
 }
 
@@ -106,11 +114,19 @@ function start(){
 							requestId = url.split('/p/')[1].split('.')[0];
 						res.write('currentBlogApp is '+ currentBlogApp + ' , ' + 'requestId id is ' + requestId +'<br/>');
 						console.log('currentBlogApp is '+ currentBlogApp + '\n' + 'requestId id is ' + requestId);
-
-						res.write('the article title is :'+$('title').text() +'<br/>');
-
+						var title = $('title').text()
+						res.write('the article title is :'+title +'<br/>');
 						var flag = 	isRepeat(currentBlogApp);
+						var sql = 'update blog set title = ' + '"'+ title + '"'+' where currentBlogApp = '+ '"'+ currentBlogApp + '"'
+						db.query(sql,(err,result)=>{
+							if (err) throw err;
+							if (!!result) {
+								console.log('更新成功');
 
+							} else {
+								console.log('插入失败');
+							}
+						});
 						if(!flag){
 							var appUrl = 'https://www.cnblogs.com/'+currentBlogApp+'/ajax/news.aspx';
 							personInfo(appUrl);
@@ -119,7 +135,7 @@ function start(){
 
 				setTimeout(function() {
 					curCount--;
-					callback(null,url +'Call back content');
+					callback(null,url +' Call back content');
 				}, delay);
 			};
 
@@ -131,7 +147,7 @@ function start(){
 			}, function (err,result) {
 				endDate = new Date();
 				console.log('final:');
-				console.log(result);
+				console.log('result: '+result);
 				console.log(catchDate);
 				var len = catchDate.length,
 					aveAge = 0,
@@ -149,6 +165,23 @@ function start(){
 					aveFans += parseInt(eachDateJsonFans);
 					aveFocus += parseInt(eachDateJsonFocus);
 					res.write('eachDate'+eachDate +'<br/>');
+					var info = {
+						currentBlogApp : articleUrls[i].split('/p/')[0].split('/')[3],
+						author: eachDateJson.name.trim(),
+						age: isNaN(eachDateJson.age)?0:eachDateJson.age,
+						fans: parseInt(eachDateJsonFans),
+						focus: parseInt(eachDateJsonFocus),
+						href: articleUrls[i]
+					};
+					db.query('insert into blog set ?', info, function(err,result){
+						if (err) throw err;
+						if (!!result) {
+							console.log('插入成功');
+							console.log(result.insertId);
+						} else {
+							console.log('插入失败');
+						}
+					});
 				}
 
 				//统计结果

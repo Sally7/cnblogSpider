@@ -24,3 +24,9 @@ superagent.get(url)
 3.作者等统计不对
 第121行
 var appUrl = 'https://www.cnblogs.com/'+currentBlogApp+'/ajax/news.aspx';
+
+在写入mysql表的时候，更新表在插入数据前，执行第二次 才会正确
+解决方案思路：更新表和写入表的顺序注意一下
+
+为了方便，只爬取了一页的数据 存入了mysql表，修改一下pageNum,避免多文章对应一个作者，可以把requestId作为唯一值
+现在用的是 currentBlogApp
