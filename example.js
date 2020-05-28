@@ -22,7 +22,7 @@ var ep = new eventproxy(),
 
 for(var i=1 ; i<= pageNum ; i++){
 
-	pageUrls.push('http://www.cnblogs.com/?CategoryId=808&CategoryType=%22SiteHome%22&ItemListActionName=%22PostList%22&PageIndex='+ i +'&ParentCategoryId=0');
+	pageUrls.push('http://www.cnblogs.com/?CategoryId=808&CategoryType=%22SiteHome%22&ItemListActionName=%22AggSitePostList%22&PageIndex='+ i +'&ParentCategoryId=0&TotalPostCount=4000');
 }
 
 // 主start程序
@@ -79,7 +79,7 @@ function start(){
 						var currentBlogApp = url.split('/p/')[0].split('/')[3],	
 							requestId = url.split('/p/')[1].split('.')[0];
 
-						var appUrl = "http://www.cnblogs.com/mvc/blog/news.aspx?blogApp="+ currentBlogApp;
+						var appUrl = 'https://www.cnblogs.com/'+currentBlogApp+'/ajax/news.aspx';
 						personInfo(appUrl);
 						
 		  		});
